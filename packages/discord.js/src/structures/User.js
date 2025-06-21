@@ -29,6 +29,9 @@ class User extends Base {
 
     this.flags = null;
 
+    this.clan = null;
+
+    console.log('A user was created:', data);
     this._patch(data);
   }
 
@@ -153,6 +156,27 @@ class User extends Base {
     } else {
       this.avatarDecorationData = null;
     }
+
+    /**
+     * @typedef {Object} UserClan
+     * @property {Snowflake} guildId Identifier of the guild of the tag
+     * @property {string} badge The badge of the clan
+     * @property {string} tag The tag of the clan
+     */
+
+    if (data.clan) {
+      /**
+       * The user clan data
+       * @type {?UserClan}
+       */
+      this.clan = {
+        guildId: data.clan.identity_guild_id,
+        badge: data.clan.badge,
+        tag: data.clan.tag,
+      };
+    } else {
+      this.clan ??= null;
+    }
   }
 
   /**
@@ -188,7 +212,9 @@ class User extends Base {
    * @returns {?string}
    */
   avatarURL(options = {}) {
-    return this.avatar && this.client.rest.cdn.avatar(this.id, this.avatar, options);
+    return (
+      this.avatar && this.client.rest.cdn.avatar(this.id, this.avatar, options)
+    );
   }
 
   /**
@@ -198,10 +224,23 @@ class User extends Base {
    */
   avatarDecorationURL(options = {}) {
     if (this.avatarDecorationData) {
-      return this.client.rest.cdn.avatarDecoration(this.avatarDecorationData.asset);
+      return this.client.rest.cdn.avatarDecoration(
+        this.avatarDecorationData.asset
+      );
     }
 
-    return this.avatarDecoration && this.client.rest.cdn.avatarDecoration(this.id, this.avatarDecoration, options);
+    return (
+      this.avatarDecoration &&
+      this.client.rest.cdn.avatarDecoration(
+        this.id,
+        this.avatarDecoration,
+        options
+      )
+    );
+  }
+
+  fetchClan(force) {
+    return this.client.users.fetchClan(this.id, { force });
   }
 
   /**
@@ -210,7 +249,10 @@ class User extends Base {
    * @readonly
    */
   get defaultAvatarURL() {
-    const index = this.discriminator === '0' ? calculateUserDefaultAvatarIndex(this.id) : this.discriminator % 5;
+    const index =
+      this.discriminator === '0'
+        ? calculateUserDefaultAvatarIndex(this.id)
+        : this.discriminator % 5;
     return this.client.rest.cdn.defaultAvatar(index);
   }
 
@@ -241,7 +283,9 @@ class User extends Base {
    * @returns {?string}
    */
   bannerURL(options = {}) {
-    return this.banner && this.client.rest.cdn.banner(this.id, this.banner, options);
+    return (
+      this.banner && this.client.rest.cdn.banner(this.id, this.banner, options)
+    );
   }
 
   /**
@@ -314,7 +358,8 @@ class User extends Base {
       this.accentColor === user.accentColor &&
       this.avatarDecoration === user.avatarDecoration &&
       this.avatarDecorationData?.asset === user.avatarDecorationData?.asset &&
-      this.avatarDecorationData?.skuId === user.avatarDecorationData?.skuId
+      this.avatarDecorationData?.skuId === user.avatarDecorationData?.skuId &&
+      this.clan?.guildId === user.clan?.guildId
     );
   }
 
@@ -334,12 +379,19 @@ class User extends Base {
       this.avatar === user.avatar &&
       this.flags?.bitfield === user.public_flags &&
       ('banner' in user ? this.banner === user.banner : true) &&
-      ('accent_color' in user ? this.accentColor === user.accent_color : true) &&
-      ('avatar_decoration' in user ? this.avatarDecoration === user.avatar_decoration : true) &&
+      ('accent_color' in user
+        ? this.accentColor === user.accent_color
+        : true) &&
+      ('avatar_decoration' in user
+        ? this.avatarDecoration === user.avatar_decoration
+        : true) &&
       ('avatar_decoration_data' in user
-        ? this.avatarDecorationData?.asset === user.avatar_decoration_data?.asset &&
-          this.avatarDecorationData?.skuId === user.avatar_decoration_data?.sku_id
-        : true)
+        ? this.avatarDecorationData?.asset ===
+            user.avatar_decoration_data?.asset &&
+          this.avatarDecorationData?.skuId ===
+            user.avatar_decoration_data?.sku_id
+        : true) &&
+      ('clan' in user ? this.clan?.guildId === user.clan?.guildId : true)
     );
   }
 
@@ -383,7 +435,7 @@ class User extends Base {
         hexAccentColor: true,
         tag: true,
       },
-      ...props,
+      ...props
     );
     json.avatarURL = this.avatarURL();
     json.displayAvatarURL = this.displayAvatarURL();

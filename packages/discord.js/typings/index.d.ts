@@ -3747,6 +3747,12 @@ export class Typing extends Base {
   };
 }
 
+export interface UserClan {
+  guildId: Snowflake;
+  badge: string;
+  tag: string;
+}
+
 export interface AvatarDecorationData {
   asset: string;
   skuId: Snowflake;

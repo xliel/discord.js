@@ -42,8 +42,10 @@ class UserManager extends CachedManager {
    */
   dmChannel(userId) {
     return (
-      this.client.channels.cache.find(channel => channel.type === ChannelType.DM && channel.recipientId === userId) ??
-      null
+      this.client.channels.cache.find(
+        (channel) =>
+          channel.type === ChannelType.DM && channel.recipientId === userId
+      ) ?? null
     );
   }
 
@@ -61,7 +63,9 @@ class UserManager extends CachedManager {
       if (dmChannel && !dmChannel.partial) return dmChannel;
     }
 
-    const data = await this.client.rest.post(Routes.userChannels(), { body: { recipient_id: id } });
+    const data = await this.client.rest.post(Routes.userChannels(), {
+      body: { recipient_id: id },
+    });
     return this.client.channels._add(data, null, { cache });
   }
 
@@ -125,7 +129,8 @@ class UserManager extends CachedManager {
    * @returns {?User}
    */
   resolve(user) {
-    if (user instanceof GuildMember || user instanceof ThreadMember) return user.user;
+    if (user instanceof GuildMember || user instanceof ThreadMember)
+      return user.user;
     if (user instanceof Message) return user.author;
     return super.resolve(user);
   }
