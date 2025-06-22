@@ -3494,6 +3494,12 @@ export class Typing extends Base {
   };
 }
 
+export interface UserClan {
+  guildId: Snowflake;
+  badge: string;
+  tag: string;
+}
+
 export interface AvatarDecorationData {
   asset: string;
   skuId: Snowflake;
@@ -3517,6 +3523,7 @@ export class User extends Base {
   public accentColor: number | null | undefined;
   public avatar: string | null;
   public avatarDecorationData: AvatarDecorationData | null;
+  public clan: UserClan | null;
   public banner: string | null | undefined;
   public bot: boolean;
   public get createdAt(): Date;
